@@ -1,51 +1,53 @@
-# Sum of Pairs
+# find last most occuring el that could be the second el of pair; save index
+# -- max = first num in reverse that is sum or less
+# iterate between first num in array and each number up to max num
+# -- if num plus the next number is equal to sum
+# -- -- save num and nex num
+# -- -- -- find index of first num, second num
+# -- -- -- -- second num is new max num; save index
+# -- if no matches found do the same for next first num with each num
+# -- if no matches found throughout entire array
+# -- -- return nil
 
-# Given a list of integers and a single sum value, return the first 
-# two values (parse from the left please) in order of appearance that 
-# add up to form the sum.
-
-# return first pair of elements in a given array whos sum == x
-# -- two arg: array of integers, sum
-# -- first pair: second element with lowest index
-# -- -- if second element is equal, pick pair with lowest first element index
-# -- -- if no pair is found return nil
-
-# => iterate through array and add element to each element after it
-# -- --
-# -- if value is equal to sum, save index of both values in new_array 
-# -- -- ie: [[0,1], [3, 5]]
-# -- repeat for each possible pair
-# select index pair with lowest second value
-# -- if two second values are equal, lowest first value
-# return elements from orig array with those index; nil if none found
+require 'pry'
 
 def sum_pairs(array, sum)
-  pairs = []
-  array.each_with_index do |first, idx1|
-    array.each_with_index do |second, idx2|
-      if first + second == sum && idx1 < idx2
-        pairs << [idx1, idx2]
+  min_idx = 0
+  max_idx = array.length - 1
+  idx_pairs = []
+  loop do
+    current_max = max_idx
+    (min_idx + 1).upto(max_idx) do |idx|
+      if array[min_idx] + array[idx] == sum
+        current_max = idx
+        idx_pairs << [min_idx, idx, array[min_idx], array[idx]]
+        break
       end
     end
+    
+    min_idx += 1
+    max_idx = current_max
+    break if min_idx == max_idx
   end
-  return nil if pairs.empty?
-  reversed_pairs = pairs.map(&:reverse)
-  result_pair = reversed_pairs.sort[0].reverse
-  [array[result_pair[0]], array[result_pair[1]]]
+  
+  # idx_pairs.sort_by! { |x, y| y[1] <=> x[1] }
+  final = idx_pairs.min_by { |arr| arr[1] }
+  
+  final != nil ? final[2..3] : final
 end
 
- p sum_pairs([11, 3, 7, 5], 10)
-# # #              ^--^      3 + 7 = 10
+p sum_pairs([11, 3, 7, 5], 10)
+#                ^--^      3 + 7 = 10
 # # == [3, 7]
 
- p sum_pairs([4, 3, 2, 3, 4],         6)
+p sum_pairs([4, 3, 2, 3, 4],         6)
 # # #          ^-----^         4 + 2 = 6, indices: 0, 2 *
 # # #             ^-----^      3 + 3 = 6, indices: 1, 3
 # # #                ^-----^   2 + 4 = 6, indices: 2, 4
 # # #  * entire pair is earlier, and therefore is the correct answer
 # # == [4, 2]
 
- p sum_pairs([0, 0, -2, 3], 2)
+p sum_pairs([0, 0, -2, 3], 2)
 # # #  there are no pairs of values that can be added to produce 2.
 # # == nil
 
